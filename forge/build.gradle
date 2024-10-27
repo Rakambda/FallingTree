@@ -57,7 +57,7 @@ dependencies {
     minecraft(libs.forge)
     library(project(":common"))
 
-    implementation("me.shedaniel.cloth:cloth-config-forge:${libs.versions.clothConfigVersion.get()}")
+//    implementation("me.shedaniel.cloth:cloth-config-forge:${libs.versions.clothConfigVersion.get()}")
 
     // Hack fix for now, force jopt-simple to be exactly 5.0.4 because Mojang ships that version, but some transitive dependencies request 6.0+
     implementation('net.sf.jopt-simple:jopt-simple:5.0.4') { version { strictly '5.0.4' } }

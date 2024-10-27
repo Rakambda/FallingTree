@@ -36,7 +36,7 @@ public class PlayerWrapper implements IPlayer{
 			}
 		}
 		else{
-			raw.sendSystemMessage(text);
+			raw.displayClientMessage(text, true);
 		}
 	}
 	

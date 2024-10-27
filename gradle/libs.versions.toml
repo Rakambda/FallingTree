@@ -10,7 +10,7 @@ log4j2-version = "2.24.1"
 minecraftVersion = "1.21.3"
 fabric-loader-version = "0.16.7"
 fabric-api-version = "0.106.1+1.21.3"
-forge-version = "1.21.1-52.0.4"
+forge-version = "1.21.3-53.0.4"
 neoforge-version = "21.3.0-beta"
 
 # Mod dependencies
