@@ -10,12 +10,9 @@
     "type: \uD83D\uDCDA dependencies"
   ],
   "enabledManagers" : [
-    "dockerfile",
-    "maven",
     "nuget",
     "pip_requirements",
     "github-actions",
-    "gradle",
     "gradle-wrapper",
     "cargo"
   ],
