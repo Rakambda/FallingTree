@@ -6,12 +6,6 @@ registries:
     username: ${{ secrets.DOCKER_HUB_USERNAME }}
     password: ${{ secrets.DOCKER_HUB_TOKEN }}
     replaces-base: true
-  rakambda:
-    type: docker-registry
-    url: ${{ secrets.DOCKER_RAKAMBDA_URL }}
-    username: ${{ secrets.DOCKER_RAKAMBDA_USERNAME }}
-    password: ${{ secrets.DOCKER_RAKAMBDA_TOKEN }}
-    replaces-base: true
 
 updates:
   - package-ecosystem: "gradle"
@@ -51,7 +45,6 @@ updates:
       separator: "-"
     registries:
       - dockerhub
-      - rakambda
   - package-ecosystem: "maven"
     directory: "/"
     assignees:
