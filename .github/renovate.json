@@ -11,7 +11,6 @@
   ],
   "enabledManagers" : [
     "nuget",
-    "pip_requirements",
     "github-actions",
     "gradle-wrapper",
     "cargo"
