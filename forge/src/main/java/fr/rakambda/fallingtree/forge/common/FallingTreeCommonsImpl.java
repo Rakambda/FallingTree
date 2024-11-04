@@ -28,6 +28,8 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -42,8 +44,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistry;
 import org.jetbrains.annotations.NotNull;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -110,9 +110,9 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 			var resourceLocation = idExternal(name);
 			if(isTag){
 				var tag = TagKey.create(Registries.BLOCK, resourceLocation);
-				return getRegistryTagContent(ForgeRegistries.BLOCKS, tag).map(BlockWrapper::new);
+				return getRegistryTagContent(BuiltInRegistries.BLOCK, tag).map(BlockWrapper::new);
 			}
-			return getRegistryElement(ForgeRegistries.BLOCKS, resourceLocation).stream().map(BlockWrapper::new);
+			return getRegistryElement(BuiltInRegistries.BLOCK, resourceLocation).stream().map(BlockWrapper::new);
 		}
 		catch(Exception e){
 			return empty();
@@ -130,9 +130,9 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 			var resourceLocation = idExternal(name);
 			if(isTag){
 				var tag = TagKey.create(Registries.ITEM, resourceLocation);
-				return getRegistryTagContent(ForgeRegistries.ITEMS, tag).map(ItemWrapper::new);
+				return getRegistryTagContent(BuiltInRegistries.ITEM, tag).map(ItemWrapper::new);
 			}
-			return getRegistryElement(ForgeRegistries.ITEMS, resourceLocation).stream().map(ItemWrapper::new);
+			return getRegistryElement(BuiltInRegistries.ITEM, resourceLocation).stream().map(ItemWrapper::new);
 		}
 		catch(Exception e){
 			return empty();
@@ -141,7 +141,7 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 	
 	@Override
 	public boolean isLeafBlock(@NotNull IBlock block){
-		var isAllowedBlock = registryTagContains(ForgeRegistries.BLOCKS, BlockTags.LEAVES, (Block) block.getRaw())
+		var isAllowedBlock = registryTagContains(BuiltInRegistries.BLOCK, BlockTags.LEAVES, (Block) block.getRaw())
 				|| getConfiguration().getTrees().getAllowedLeaveBlocks(this).stream().anyMatch(leaf -> leaf.equals(block));
 		if(isAllowedBlock){
 			var isDeniedBlock = getConfiguration().getTrees().getDeniedLeaveBlocks(this).stream().anyMatch(leaf -> leaf.equals(block));
@@ -152,7 +152,7 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 	
 	@Override
 	public boolean isLogBlock(@NotNull IBlock block){
-		var isAllowedBlock = getConfiguration().getTrees().getDefaultLogsBlocks(this).stream().anyMatch(log -> log.equals(block))
+ 		var isAllowedBlock = getConfiguration().getTrees().getDefaultLogsBlocks(this).stream().anyMatch(log -> log.equals(block))
 				|| getConfiguration().getTrees().getAllowedLogBlocks(this).stream().anyMatch(log -> log.equals(block));
 		if(isAllowedBlock){
 			var isDeniedBlock = getConfiguration().getTrees().getDeniedLogBlocks(this).stream().anyMatch(log -> log.equals(block));
@@ -164,11 +164,12 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 	@Override
 	@NotNull
 	public Set<IBlock> getAllNonStrippedLogsBlocks(){
-		return getRegistryTagContent(ForgeRegistries.BLOCKS, BlockTags.LOGS)
-				.filter(block -> !Optional.ofNullable(ForgeRegistries.BLOCKS.getKey(block))
+		return getRegistryTagContent(BuiltInRegistries.BLOCK, BlockTags.LOGS)
+				.filter(block -> !Optional.of(BuiltInRegistries.BLOCK.getKey(block))
 						.map(ResourceLocation::getPath)
 						.map(name -> name.startsWith("stripped"))
-						.orElse(false))
+						.orElse(false)
+				)
 				.map(BlockWrapper::new)
 				.collect(Collectors.toSet());
 	}
@@ -187,7 +188,7 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 	
 	@Override
 	public boolean isNetherWartOrShroomlight(@NotNull IBlock block){
-		return registryTagContains(ForgeRegistries.BLOCKS, BlockTags.WART_BLOCKS, (Block) block.getRaw())
+		return registryTagContains(BuiltInRegistries.BLOCK, BlockTags.WART_BLOCKS, (Block) block.getRaw())
 				|| Blocks.SHROOMLIGHT.equals(block.getRaw());
 	}
 	
@@ -208,16 +209,17 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 	}
 	
 	@NotNull
-	private <T> Optional<T> getRegistryElement(IForgeRegistry<T> registryKey, ResourceLocation identifier){
-		return registryKey.getHolder(identifier).map(Holder::value);
+	private <T> Optional<T> getRegistryElement(Registry<T> registryKey, ResourceLocation identifier){
+		return registryKey.get(identifier).map(Holder::value);
 	}
 	
 	@NotNull
-	private <T> Stream<T> getRegistryTagContent(@NotNull IForgeRegistry<T> registry, @NotNull TagKey<T> tag){
-		return registry.tags().getTag(tag).stream();
+	private <T> Stream<T> getRegistryTagContent(@NotNull Registry<T> registry, @NotNull TagKey<T> tag){
+		return registry.get(tag).stream()
+				.flatMap(a -> a.stream().map(Holder::value));
 	}
 	
-	private <T> boolean registryTagContains(@NotNull IForgeRegistry<T> registry, @NotNull TagKey<T> tag, @NotNull T element){
+	private <T> boolean registryTagContains(@NotNull Registry<T> registry, @NotNull TagKey<T> tag, @NotNull T element){
 		return getRegistryTagContent(registry, tag).anyMatch(element::equals);
 	}
 	
