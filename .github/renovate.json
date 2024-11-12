@@ -10,7 +10,6 @@
     "type: \uD83D\uDCDA dependencies"
   ],
   "enabledManagers" : [
-    "nuget",
     "github-actions",
     "gradle-wrapper",
     "cargo"
