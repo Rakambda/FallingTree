@@ -26,11 +26,11 @@ runs {
         systemProperty "forge.enabledGameTestNamespaces", "fallingtree"
     }
 
-    data {
-//        taskName "runFTNeoForgeData"
-        workingDirectory.set(project.file("./run/data"))
-        programArguments.addAll '--mod', 'fallingtree', '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-    }
+//    datagen {
+////        taskName "runFTNeoForgeData"
+//        workingDirectory.set(project.file("./run/data"))
+//        programArguments '--mod', 'fallingtree', '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+//    }
 }
 
 minecraft {
