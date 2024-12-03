@@ -20,3 +20,5 @@ jobs:
       key-pass: ${{ secrets.KEYSTORE_FORGE_MODS_KEY_PASS }}
       curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
       modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
+  
+  
