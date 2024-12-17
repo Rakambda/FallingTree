@@ -1,0 +1,9 @@
+name: Auto approve sync files
+on:
+  pull_request:
+
+jobs:
+  auto-approve-synced-files:
+    uses: RakambdaOrg/rakambda-github-workflows/.github/workflows/approve-sync-files.yml@main
+    secrets:
+      sync-token: ${{ secrets.SYNC_TOKEN }}
