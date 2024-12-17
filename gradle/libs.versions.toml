@@ -4,7 +4,7 @@
 lombok-version = "1.18.36"
 jetbrains-annotations-version = "26.0.1"
 gson-version = "2.11.0"
-log4j2-version = "2.24.1"
+log4j2-version = "2.24.3"
 
 # Minecraft / Loaders
 minecraftVersion = "1.21.4"
