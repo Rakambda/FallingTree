@@ -1,0 +1,32 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    assignees:
+      - Rakambda
+    schedule:
+      interval: daily
+      time: 05:00
+      timezone: Europe/Paris
+    pull-request-branch-name:
+      separator: "-"
+  - package-ecosystem: gradle
+    directory: /
+    assignees:
+      - Rakambda
+    schedule:
+      interval: daily
+      time: 05:00
+      timezone: Europe/Paris
+    pull-request-branch-name:
+      separator: "-"
+    groups:
+      log4j:
+        patterns:
+          - org.apache.logging.log4j:log4j-core
+          - org.apache.logging.log4j:log4j-slf4j2-impl
+      google-apis:
+        patterns:
+          - com.google.api-client:google-api-client
+          - com.google.oauth-client:google-oauth-client-jetty
+          - com.google.apis:google-api-services-gmail
+          - com.google.apis:google-api-services-calendar
