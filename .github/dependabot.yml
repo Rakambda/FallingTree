@@ -84,6 +84,9 @@ updates:
         patterns:
           - "opencvsharp4"
           - "opencvsharp4.*"
+      mstest:
+        patterns:
+          - "MSTest.*"
   - package-ecosystem: "pip"
     directory: "/"
     assignees:
