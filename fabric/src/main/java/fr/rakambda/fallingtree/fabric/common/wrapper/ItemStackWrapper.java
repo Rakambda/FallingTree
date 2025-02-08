@@ -1,5 +1,6 @@
 package fr.rakambda.fallingtree.fabric.common.wrapper;
 
+import java.util.Optional;
 import fr.rakambda.fallingtree.common.config.enums.BreakMode;
 import fr.rakambda.fallingtree.common.wrapper.IItem;
 import fr.rakambda.fallingtree.common.wrapper.IItemStack;
@@ -14,7 +15,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.block.Blocks;
 import org.jetbrains.annotations.NotNull;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @ToString
