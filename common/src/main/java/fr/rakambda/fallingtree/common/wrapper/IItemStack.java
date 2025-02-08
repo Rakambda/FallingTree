@@ -1,8 +1,8 @@
 package fr.rakambda.fallingtree.common.wrapper;
 
+import java.util.Optional;
 import fr.rakambda.fallingtree.common.config.enums.BreakMode;
 import org.jetbrains.annotations.NotNull;
-import java.util.Optional;
 
 public interface IItemStack extends IWrapper{
 	boolean isEmpty();
@@ -24,4 +24,11 @@ public interface IItemStack extends IWrapper{
 	Optional<BreakMode> getBreakModeFromEnchant();
 	
 	boolean canPerformAxeAction();
+	
+	default int getDurability(){
+		if(isDamageable()){
+			return getMaxDamage() - getDamage();
+		}
+		return Integer.MAX_VALUE;
+	}
 }
