@@ -1,14 +1,20 @@
 package fr.rakambda.fallingtree.common.tree;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import static java.util.Comparator.comparingInt;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toSet;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
 import fr.rakambda.fallingtree.common.wrapper.ILevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import java.util.*;
-import static java.util.Comparator.comparingInt;
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toSet;
 
 @RequiredArgsConstructor
 public class Tree{
@@ -68,9 +74,17 @@ public class Tree{
 	}
 	
 	@NotNull
-	public Collection<TreePart> getLogs(){
+	public Optional<TreePart> getLastSequenceLogPart(){
 		return getParts().stream()
-				.filter(part -> part.treePartType() == TreePartType.LOG)
+				.filter(part -> part.treePartType().isLog())
+				.max(comparingInt(TreePart::sequence));
+	}
+	
+	@NotNull
+	public Collection<TreePart> getBreakableLogs(){
+		return getParts().stream()
+				.filter(part -> part.treePartType().isLog())
+				.filter(part -> part.treePartType().isBreakable())
 				.collect(toSet());
 	}
 	
@@ -87,7 +101,7 @@ public class Tree{
 	
 	@NotNull
 	public Optional<IBlockPos> getTopMostLog(){
-		return getLogs().stream()
+		return getBreakableLogs().stream()
 				.map(TreePart::blockPos)
 				.max(comparingInt(IBlockPos::getY));
 	}
@@ -104,5 +118,12 @@ public class Tree{
 		return getParts().stream()
 				.filter(part -> part.treePartType() == TreePartType.NETHER_WART)
 				.collect(toSet());
+	}
+	
+	@NotNull
+	public Optional<TreePart> getStart(){
+		return getParts().stream()
+				.filter(part -> part.treePartType() == TreePartType.LOG_START)
+				.findFirst();
 	}
 }
