@@ -2,6 +2,7 @@ package fr.rakambda.fallingtree.fabric.mixin;
 
 import fr.rakambda.fallingtree.fabric.FallingTree;
 import fr.rakambda.fallingtree.fabric.common.wrapper.BlockPosWrapper;
+import fr.rakambda.fallingtree.fabric.common.wrapper.BlockStateWrapper;
 import fr.rakambda.fallingtree.fabric.common.wrapper.PlayerWrapper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
@@ -19,8 +20,9 @@ public abstract class AbstractBlockMixin{
 	public void calcBlockBreakingDelta(BlockState blockState, Player player, BlockGetter blockGetter, BlockPos blockPos, CallbackInfoReturnable<Float> callbackInfoReturnable){
 		var wrappedPlayer = new PlayerWrapper(player);
 		var wrappedPos = new BlockPosWrapper(blockPos);
+		var wrappedState = new BlockStateWrapper(blockState);
 		
-		var result = FallingTree.getMod().getTreeHandler().getBreakSpeed(wrappedPlayer, wrappedPos, callbackInfoReturnable.getReturnValue());
+		var result = FallingTree.getMod().getTreeHandler().getBreakSpeed(wrappedPlayer, wrappedPos, wrappedState, callbackInfoReturnable.getReturnValue());
 		if(result.isEmpty()){
 			return;
 		}
