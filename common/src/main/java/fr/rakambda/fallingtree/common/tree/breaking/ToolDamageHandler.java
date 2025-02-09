@@ -25,7 +25,7 @@ public class ToolDamageHandler{
 		this.damageRounding = damageRounding;
 		
 		if(breakableCount > maxSize && maxSizeAction == MaxSizeAction.ABORT){
-			log.debug("Tree reached max size of {}", maxSize);
+			log.info("Tree reached max size of {}", maxSize);
 			throw new BreakTreeTooBigException();
 		}
 		
