@@ -1,5 +1,10 @@
 package fr.rakambda.fallingtree.common.tree;
 
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import static java.util.Objects.isNull;
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
 import fr.rakambda.fallingtree.common.config.enums.BreakMode;
 import fr.rakambda.fallingtree.common.tree.breaking.BreakTreeTooBigException;
@@ -17,11 +22,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import static java.util.Objects.isNull;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -29,6 +29,15 @@ public class TreeHandler{
 	@NotNull
 	private final FallingTreeCommon<?> mod;
 	private final Map<UUID, CacheSpeed> speedCache = new ConcurrentHashMap<>();
+	
+	public boolean shouldCancelEvent(@NotNull IPlayer player){
+		return shouldPreserveTool(player);
+	}
+	
+	private boolean shouldPreserveTool(@NotNull IPlayer player){
+		var handItem = player.getMainHandItem();
+		return mod.getConfiguration().getTools().getDurabilityMode().shouldPreserve(handItem.getDurability());
+	}
 	
 	@NotNull
 	public IBreakAttemptResult breakTree(@NotNull ILevel level, @NotNull IPlayer player, @NotNull IBlockPos blockPos){
