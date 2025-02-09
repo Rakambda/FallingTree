@@ -1,7 +1,9 @@
 package fr.rakambda.fallingtree.neoforge.event;
 
+import javax.annotation.Nonnull;
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
 import fr.rakambda.fallingtree.neoforge.common.wrapper.BlockPosWrapper;
+import fr.rakambda.fallingtree.neoforge.common.wrapper.BlockStateWrapper;
 import fr.rakambda.fallingtree.neoforge.common.wrapper.LevelWrapper;
 import fr.rakambda.fallingtree.neoforge.common.wrapper.PlayerWrapper;
 import fr.rakambda.fallingtree.neoforge.common.wrapper.ServerLevelWrapper;
@@ -11,7 +13,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.neoforge.event.level.BlockEvent;
 import org.jetbrains.annotations.NotNull;
-import javax.annotation.Nonnull;
 
 @RequiredArgsConstructor
 public class BlockBreakListener{
@@ -31,8 +32,9 @@ public class BlockBreakListener{
 		
 		var wrappedPlayer = new PlayerWrapper(event.getEntity());
 		var wrappedPos = new BlockPosWrapper(optionalPos.get());
+		var wrappedState = new BlockStateWrapper(event.getState());
 		
-		var result = mod.getTreeHandler().getBreakSpeed(wrappedPlayer, wrappedPos, event.getNewSpeed());
+		var result = mod.getTreeHandler().getBreakSpeed(wrappedPlayer, wrappedPos, wrappedState, event.getNewSpeed());
 		if(result.isEmpty()){
 			return;
 		}
@@ -52,8 +54,15 @@ public class BlockBreakListener{
 		var wrappedPlayer = new PlayerWrapper(event.getPlayer());
 		var wrappedLevel = event.getLevel() instanceof ServerLevel serverLevel ? new ServerLevelWrapper(serverLevel) : new LevelWrapper(event.getLevel());
 		var wrappedPos = new BlockPosWrapper(event.getPos());
+		var wrappedState = new BlockStateWrapper(event.getState());
+		var wrappedEntity = wrappedLevel.getBlockEntity(wrappedPos);
 		
-		var result = mod.getTreeHandler().breakTree(wrappedLevel, wrappedPlayer, wrappedPos);
+		if(mod.getTreeHandler().shouldCancelEvent(wrappedPlayer)){
+			event.setCanceled(true);
+			return;
+		}
+		
+		var result = mod.getTreeHandler().breakTree(true, wrappedLevel, wrappedPlayer, wrappedPos, wrappedState, wrappedEntity);
 		if(result.shouldCancel()){
 			event.setCanceled(true);
 		}
