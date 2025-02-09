@@ -16,7 +16,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
-public class BlockBreakListener implements PlayerBlockBreakEvents.Before{
+public class BlockBreakListener implements PlayerBlockBreakEvents.Before, PlayerBlockBreakEvents.After{
 	@NotNull
 	private final FallingTreeCommon<?> mod;
 	
@@ -26,10 +26,16 @@ public class BlockBreakListener implements PlayerBlockBreakEvents.Before{
 	@Override
 	public boolean beforeBlockBreak(Level level, Player player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity){
 		var wrappedPlayer = new PlayerWrapper(player);
+		
+		return !mod.getTreeHandler().shouldCancelEvent(wrappedPlayer);
+	}
+	
+	@Override
+	public void afterBlockBreak(Level level, Player player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity){
+		var wrappedPlayer = new PlayerWrapper(player);
 		var wrappedLevel = level instanceof ServerLevel serverLevel ? new ServerLevelWrapper(serverLevel) : new LevelWrapper(level);
 		var wrappedPos = new BlockPosWrapper(blockPos);
 		
-		var result = mod.getTreeHandler().breakTree(wrappedLevel, wrappedPlayer, wrappedPos);
-		return !result.shouldCancel();
+		mod.getTreeHandler().breakTree(wrappedLevel, wrappedPlayer, wrappedPos);
 	}
 }
