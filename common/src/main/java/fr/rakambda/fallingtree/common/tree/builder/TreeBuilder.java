@@ -9,6 +9,7 @@ import fr.rakambda.fallingtree.common.tree.builder.position.IPositionFetcher;
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
 import fr.rakambda.fallingtree.common.wrapper.DirectionCompat;
 import fr.rakambda.fallingtree.common.wrapper.IBlock;
+import fr.rakambda.fallingtree.common.wrapper.IBlockEntity;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
 import fr.rakambda.fallingtree.common.wrapper.IBlockState;
 import fr.rakambda.fallingtree.common.wrapper.ILevel;
@@ -16,6 +17,7 @@ import fr.rakambda.fallingtree.common.wrapper.IPlayer;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
@@ -33,8 +35,8 @@ public class TreeBuilder{
 	private final FallingTreeCommon<?> mod;
 	
 	@NotNull
-	public Optional<Tree> getTree(@NotNull IPlayer player, @NotNull ILevel level, @NotNull IBlockPos originPos) throws TreeTooBigException{
-		var originBlock = level.getBlockState(originPos).getBlock();
+	public Optional<Tree> getTree(@NotNull IPlayer player, @NotNull ILevel level, @NotNull IBlockPos originPos, @NotNull IBlockState originState, @Nullable IBlockEntity originEntity) throws TreeTooBigException{
+		var originBlock = originState.getBlock();
 		if(!mod.isLogBlock(originBlock)){
 			return empty();
 		}
@@ -43,7 +45,7 @@ public class TreeBuilder{
 		var toAnalyzePos = new PriorityQueue<ToAnalyzePos>();
 		var analyzedPos = new HashSet<ToAnalyzePos>();
 		var tree = new Tree(level, originPos);
-		toAnalyzePos.add(new ToAnalyzePos(getFirstPositionFetcher(), originPos, originBlock, originPos, originBlock, TreePartType.LOG, 0, 0));
+		toAnalyzePos.add(new ToAnalyzePos(getFirstPositionFetcher(), originPos, originBlock, originPos, originBlock, originState, originEntity, TreePartType.LOG_START, 0, 0));
 		
 		var boundingBoxSearch = getBoundingBoxSearch(originPos);
 		var adjacentPredicate = getAdjacentPredicate();
@@ -59,7 +61,7 @@ public class TreeBuilder{
 				analyzedPos.add(analyzingPos);
 				
 				if(tree.getSize() > maxScanSize){
-					log.debug("Tree at {} reached max scan size of {}", tree.getHitPos(), maxScanSize);
+					log.info("Tree at {} reached max scan size of {}", tree.getHitPos(), maxScanSize);
 					throw new TreeTooBigException();
 				}
 				if(analyzingPos.treePartType().isEdge() && analyzingPos.sequenceSinceLastLog() >= mod.getConfiguration().getTrees().getMaxLeafDistanceFromLog()){
@@ -77,7 +79,7 @@ public class TreeBuilder{
 			postProcess(tree);
 		}
 		catch(AbortSearchException e){
-			log.debug("Didn't cut tree at {}, reason: {}", originPos, e.getMessage());
+			log.info("Didn't cut tree at {}, reason: {}", originPos, e.getMessage());
 			mod.notifyPlayer(player, mod.translate("chat.fallingtree.search_aborted").append(e.getComponent()));
 			return empty();
 		}
@@ -87,7 +89,7 @@ public class TreeBuilder{
 			if(tree.getTopMostLog()
 					.map(topLog -> getLeavesAround(level, topLog) < aroundRequired)
 					.orElse(true)){
-				log.debug("Tree at {} doesn't have enough leaves around top most log", originPos);
+				log.info("Tree at {} doesn't have enough leaves around top most log", originPos);
 				return empty();
 			}
 		}
@@ -118,7 +120,7 @@ public class TreeBuilder{
 			case STOP_BRANCH -> block -> {
 				var isAllowed = allowedList.contains(block) || base.contains(block);
 				if(!isAllowed){
-					log.debug("Found block {} that isn't allowed in the adjacent blocks, branch will be ignored further", block);
+					log.info("Found block {} that isn't allowed in the adjacent blocks, branch will be ignored further", block);
 					return false;
 				}
 				return true;
@@ -202,7 +204,7 @@ public class TreeBuilder{
 		if(parent.treePartType().isEdge() && !check.treePartType().isEdge()){
 			return false;
 		}
-		if(parent.treePartType() == TreePartType.LOG && isSameTree(originBlock, check) && boundingBoxSearch.test(check.checkPos())){
+		if(parent.treePartType().isLog() && isSameTree(originBlock, check) && boundingBoxSearch.test(check.checkPos())){
 			return true;
 		}
 		if(mod.getConfiguration().getTrees().isBreakNetherTreeWarts()){
@@ -223,7 +225,7 @@ public class TreeBuilder{
 	
 	private boolean isSameTree(@NotNull IBlock parentLogBlock, @NotNull ToAnalyzePos check){
 		if(mod.getConfiguration().getTrees().isAllowMixedLogs()){
-			return check.treePartType() == TreePartType.LOG;
+			return check.treePartType().isLog();
 		}
 		else{
 			return check.checkBlock().equals(parentLogBlock);
