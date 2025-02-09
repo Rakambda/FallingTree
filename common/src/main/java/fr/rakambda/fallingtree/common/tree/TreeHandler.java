@@ -14,7 +14,9 @@ import fr.rakambda.fallingtree.common.tree.breaking.InstantaneousTreeBreakingHan
 import fr.rakambda.fallingtree.common.tree.breaking.ShiftDownTreeBreakingHandler;
 import fr.rakambda.fallingtree.common.tree.builder.TreeTooBigException;
 import fr.rakambda.fallingtree.common.utils.CacheSpeed;
+import fr.rakambda.fallingtree.common.wrapper.IBlockEntity;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
+import fr.rakambda.fallingtree.common.wrapper.IBlockState;
 import fr.rakambda.fallingtree.common.wrapper.IItemStack;
 import fr.rakambda.fallingtree.common.wrapper.ILevel;
 import fr.rakambda.fallingtree.common.wrapper.IPlayer;
@@ -40,7 +42,7 @@ public class TreeHandler{
 	}
 	
 	@NotNull
-	public IBreakAttemptResult breakTree(@NotNull ILevel level, @NotNull IPlayer player, @NotNull IBlockPos blockPos){
+	public IBreakAttemptResult breakTree(boolean isCancellable, @NotNull ILevel level, @NotNull IPlayer player, @NotNull IBlockPos originPos, @NotNull IBlockState originState, @Nullable IBlockEntity originEntity){
 		if(!level.isServer()){
 			return AbortedResult.NOT_SERVER;
 		}
@@ -48,7 +50,7 @@ public class TreeHandler{
 			return AbortedResult.NOT_ENABLED;
 		}
 		
-		if(!mod.checkForceToolUsage(player, level, blockPos)){
+		if(!mod.checkForceToolUsage(player, level, originPos)){
 			mod.notifyPlayer(player, mod.translate("chat.fallingtree.force_tool_usage", mod.getConfiguration().getTrees().getMaxScanSize()));
 			return AbortedResult.REQUIRED_TOOL_ABSENT;
 		}
@@ -58,15 +60,14 @@ public class TreeHandler{
 		}
 		
 		try{
-			var treeOptional = mod.getTreeBuilder().getTree(player, level, blockPos);
+			var treeOptional = mod.getTreeBuilder().getTree(player, level, originPos, originState, originEntity);
 			if(treeOptional.isEmpty()){
 				return AbortedResult.NO_SUCH_TREE;
 			}
 			
 			var tree = treeOptional.get();
 			var breakMode = getBreakMode(player.getMainHandItem());
-			var result = getBreakingHandler(breakMode).breakTree(player, tree);
-			return new BreakTreeResult(!result, breakMode);
+			return getBreakingHandler(breakMode).breakTree(isCancellable, player, tree);
 		}
 		catch(TreeTooBigException e){
 			mod.notifyPlayer(player, mod.translate("chat.fallingtree.tree_too_big", mod.getConfiguration().getTrees().getMaxScanSize()));
@@ -96,7 +97,7 @@ public class TreeHandler{
 	}
 	
 	@NotNull
-	public Optional<Float> getBreakSpeed(@NotNull IPlayer player, @NotNull IBlockPos blockPos, float originalSpeed){
+	public Optional<Float> getBreakSpeed(@NotNull IPlayer player, @NotNull IBlockPos blockPos, @NotNull IBlockState blockState, float originalSpeed){
 		if(!mod.getConfiguration().getTrees().isTreeBreaking()){
 			return Optional.empty();
 		}
@@ -109,7 +110,7 @@ public class TreeHandler{
 		
 		var cacheSpeed = speedCache.compute(player.getUUID(), (uuid, speed) -> {
 			if(isNull(speed) || !speed.isValid(blockPos)){
-				speed = getSpeed(player, blockPos, originalSpeed);
+				speed = getSpeed(player, blockPos, blockState, originalSpeed);
 			}
 			return speed;
 		});
@@ -117,11 +118,11 @@ public class TreeHandler{
 	}
 	
 	@Nullable
-	private CacheSpeed getSpeed(@NotNull IPlayer player, @NotNull IBlockPos pos, float originalSpeed){
+	private CacheSpeed getSpeed(@NotNull IPlayer player, @NotNull IBlockPos pos, @NotNull IBlockState blockState, float originalSpeed){
 		var speedMultiplicand = mod.getConfiguration().getTools().getSpeedMultiplicand();
 		try{
 			return speedMultiplicand <= 0 ? null :
-					mod.getTreeBuilder().getTree(player, player.getLevel(), pos)
+					mod.getTreeBuilder().getTree(player, player.getLevel(), pos, blockState, null)
 							.map(tree -> new CacheSpeed(pos, originalSpeed / ((float) speedMultiplicand * tree.getLogCount())))
 							.orElse(null);
 		}
