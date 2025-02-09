@@ -4,8 +4,11 @@ import fr.rakambda.fallingtree.common.tree.TreePart;
 import fr.rakambda.fallingtree.common.tree.TreePartType;
 import fr.rakambda.fallingtree.common.tree.builder.position.IPositionFetcher;
 import fr.rakambda.fallingtree.common.wrapper.IBlock;
+import fr.rakambda.fallingtree.common.wrapper.IBlockEntity;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
+import fr.rakambda.fallingtree.common.wrapper.IBlockState;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 
 public record ToAnalyzePos(@NotNull IPositionFetcher positionFetcher,
@@ -13,6 +16,8 @@ public record ToAnalyzePos(@NotNull IPositionFetcher positionFetcher,
                            @NotNull IBlock parentBlock,
                            @NotNull IBlockPos checkPos,
                            @NotNull IBlock checkBlock,
+                           @NotNull IBlockState checkState,
+                           @Nullable IBlockEntity checkEntity,
                            @NotNull TreePartType treePartType,
                            int sequence,
                            int sequenceSinceLastLog)
@@ -24,7 +29,7 @@ public record ToAnalyzePos(@NotNull IPositionFetcher positionFetcher,
 	}
 	
 	public TreePart toTreePart(){
-		return new TreePart(checkPos(), treePartType(), sequence());
+		return new TreePart(checkPos(), treePartType(), sequence(), checkState(), checkEntity());
 	}
 	
 	@Override

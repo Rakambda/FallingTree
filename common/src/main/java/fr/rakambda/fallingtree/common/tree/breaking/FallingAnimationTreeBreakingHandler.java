@@ -1,6 +1,8 @@
 package fr.rakambda.fallingtree.common.tree.breaking;
 
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
+import fr.rakambda.fallingtree.common.tree.IBreakAttemptResult;
+import fr.rakambda.fallingtree.common.tree.SuccessResult;
 import fr.rakambda.fallingtree.common.tree.Tree;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
 import fr.rakambda.fallingtree.common.wrapper.ILevel;
@@ -24,7 +26,8 @@ public class FallingAnimationTreeBreakingHandler implements ITreeBreakingHandler
 	private final LeafForceBreaker leafForceBreaker;
 	
 	@Override
-	public boolean breakTree(@NotNull IPlayer player, @NotNull Tree tree) throws BreakTreeTooBigException{
+	@NotNull
+	public IBreakAttemptResult breakTree(boolean isCancellable, @NotNull IPlayer player, @NotNull Tree tree) throws BreakTreeTooBigException{
 		var tool = player.getMainHandItem();
 		var level = tree.getLevel();
 		var toolHandler = new ToolDamageHandler(tool,
@@ -36,9 +39,9 @@ public class FallingAnimationTreeBreakingHandler implements ITreeBreakingHandler
 				mod.getConfiguration().getTools().getDamageRounding());
 		
 		if(toolHandler.isPreserveTool()){
-			log.debug("Didn't break tree at {} as {}'s tool was about to break", tree.getHitPos(), player);
+			log.info("Didn't break tree at {} as {}'s tool was about to break", tree.getHitPos(), player);
 			mod.notifyPlayer(player, mod.translate("chat.fallingtree.prevented_break_tool"));
-			return false;
+			return SuccessResult.DO_NOT_CANCEL;
 		}
 		
 		var scannedLeaves = new LinkedList<IBlockPos>();
@@ -84,7 +87,10 @@ public class FallingAnimationTreeBreakingHandler implements ITreeBreakingHandler
 		if(brokenCount >= wantToBreakCount){
 			leafForceBreaker.forceBreakDecayLeaves(player, tree, level);
 		}
-		return true;
+		if(player.isCreative() && mod.getConfiguration().isLootInCreative()){
+			tree.getStart().ifPresent(part -> part.blockState().getBlock().playerDestroy(level, player, tree.getHitPos(), part.blockState(), part.blockEntity(), tool));
+		}
+		return SuccessResult.DO_NOT_CANCEL;
 	}
 	
 	private void fallLeaf(LinkedList<IBlockPos> scannedLeaves, @NotNull IPlayer player, @NotNull ILevel level, int distance, @NotNull IBlockPos blockPos){

@@ -1,7 +1,10 @@
 package fr.rakambda.fallingtree.fabric.event;
 
+import java.util.Optional;
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
+import fr.rakambda.fallingtree.fabric.common.wrapper.BlockEntityWrapper;
 import fr.rakambda.fallingtree.fabric.common.wrapper.BlockPosWrapper;
+import fr.rakambda.fallingtree.fabric.common.wrapper.BlockStateWrapper;
 import fr.rakambda.fallingtree.fabric.common.wrapper.LevelWrapper;
 import fr.rakambda.fallingtree.fabric.common.wrapper.PlayerWrapper;
 import fr.rakambda.fallingtree.fabric.common.wrapper.ServerLevelWrapper;
@@ -35,7 +38,9 @@ public class BlockBreakListener implements PlayerBlockBreakEvents.Before, Player
 		var wrappedPlayer = new PlayerWrapper(player);
 		var wrappedLevel = level instanceof ServerLevel serverLevel ? new ServerLevelWrapper(serverLevel) : new LevelWrapper(level);
 		var wrappedPos = new BlockPosWrapper(blockPos);
+		var wrappedState = new BlockStateWrapper(blockState);
+		var wrappedEntity = Optional.ofNullable(blockEntity).map(BlockEntityWrapper::new).orElse(null);
 		
-		mod.getTreeHandler().breakTree(wrappedLevel, wrappedPlayer, wrappedPos);
+		mod.getTreeHandler().breakTree(false, wrappedLevel, wrappedPlayer, wrappedPos, wrappedState, wrappedEntity);
 	}
 }

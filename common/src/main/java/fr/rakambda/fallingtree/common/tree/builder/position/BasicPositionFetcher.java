@@ -1,16 +1,15 @@
 package fr.rakambda.fallingtree.common.tree.builder.position;
 
-import fr.rakambda.fallingtree.common.tree.TreePartType;
-import fr.rakambda.fallingtree.common.tree.builder.ToAnalyzePos;
+import java.util.Collection;
+import static java.util.Objects.isNull;
+import static java.util.stream.Collectors.toList;
 import fr.rakambda.fallingtree.common.FallingTreeCommon;
+import fr.rakambda.fallingtree.common.tree.builder.ToAnalyzePos;
 import fr.rakambda.fallingtree.common.wrapper.IBlockPos;
 import fr.rakambda.fallingtree.common.wrapper.ILevel;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import java.util.Collection;
-import static java.util.Objects.isNull;
-import static java.util.stream.Collectors.toList;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class BasicPositionFetcher implements IPositionFetcher{
@@ -26,10 +25,12 @@ public class BasicPositionFetcher implements IPositionFetcher{
 		var parentBlock = level.getBlockState(parentPos).getBlock();
 		return parentPos.betweenClosedStream(parentPos.above().north().east(), parentPos.below().south().west())
 				.map(checkPos -> {
-					var checkBlock = level.getBlockState(checkPos).getBlock();
+					var checkState = level.getBlockState(checkPos);
+					var checkedEntity = level.getBlockEntity(checkPos);
+					var checkBlock = checkState.getBlock();
 					var treePart = mod.getTreePart(checkBlock);
-					var logSequence = treePart == TreePartType.LOG ? 0 : (parent.sequenceSinceLastLog() + 1);
-					return new ToAnalyzePos(this, parentPos, parentBlock, checkPos.immutable(), checkBlock, treePart, parent.sequence() + 1, logSequence);
+					var logSequence = treePart.isLog() ? 0 : (parent.sequenceSinceLastLog() + 1);
+					return new ToAnalyzePos(this, parentPos, parentBlock, checkPos.immutable(), checkBlock, checkState, checkedEntity, treePart, parent.sequence() + 1, logSequence);
 				})
 				.collect(toList());
 	}

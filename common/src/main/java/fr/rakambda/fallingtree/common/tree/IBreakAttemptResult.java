@@ -9,6 +9,6 @@ import fr.rakambda.fallingtree.common.wrapper.IPlayer;
  * Failures are generally instances of {@link AbortedResult}, where are succeeded attempts are instances of
  * {@link BreakTreeResult}.
  */
-public sealed interface IBreakAttemptResult permits BreakTreeResult, AbortedResult{
+public sealed interface IBreakAttemptResult permits SuccessResult, AbortedResult{
 	boolean shouldCancel();
 }
