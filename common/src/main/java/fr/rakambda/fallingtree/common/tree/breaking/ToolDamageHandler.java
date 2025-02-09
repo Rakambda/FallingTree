@@ -31,7 +31,7 @@ public class ToolDamageHandler{
 		
 		int tempMaxBreakCount;
 		if(tool.isDamageable()){
-			var breakCount = damageMultiplicand == 0 ? maxSize : (int) Math.floor(getToolDurability() / damageMultiplicand);
+			var breakCount = damageMultiplicand == 0 ? maxSize : (int) Math.floor(tool.getDurability() / damageMultiplicand);
 			breakCount = durabilityMode.postProcess(breakCount, breakableCount);
 			tempMaxBreakCount = breakCount;
 		}
@@ -75,12 +75,5 @@ public class ToolDamageHandler{
 			return brokenCount == maxBreakCount ? maxDurabilityTaken : Math.min(maxDurabilityTaken, getDamage(brokenCount));
 		}
 		return 0;
-	}
-	
-	private int getToolDurability(){
-		if(tool.isDamageable()){
-			return tool.getMaxDamage() - tool.getDamage();
-		}
-		return Integer.MAX_VALUE;
 	}
 }
