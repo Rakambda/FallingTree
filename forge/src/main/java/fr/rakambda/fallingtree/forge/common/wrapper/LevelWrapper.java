@@ -69,6 +69,11 @@ public class LevelWrapper implements ILevel {
     public boolean removeBlock(@NotNull IBlockPos blockPos, boolean b) {
         return raw.removeBlock((BlockPos) blockPos.getRaw(), b);
     }
+	
+	@Override
+	public void setBlock(@NotNull IBlockPos blockPos, @NotNull IBlockState blockState) {
+		raw.setBlock((BlockPos) blockPos.getRaw(), (BlockState) blockState.getRaw(),1 );
+	}
 
     @Override
     public void fallBlock(@NotNull IBlockPos logBlockPos, boolean drop, double dx, double dy, double dz, double vx, double vy, double vz) {

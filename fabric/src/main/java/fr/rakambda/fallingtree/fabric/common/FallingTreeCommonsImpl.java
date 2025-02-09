@@ -228,6 +228,7 @@ public class FallingTreeCommonsImpl extends FallingTreeCommon<Direction>{
 		
 		ServerTickEvents.END_SERVER_TICK.register(new LeafBreakingListener(this));
 		PlayerBlockBreakEvents.BEFORE.register(new BlockBreakListener(this));
+		PlayerBlockBreakEvents.AFTER.register(new BlockBreakListener(this));
 		
 		CommandRegistrationCallback.EVENT.register(new ServerCommandRegistrationListener(this));
 	}

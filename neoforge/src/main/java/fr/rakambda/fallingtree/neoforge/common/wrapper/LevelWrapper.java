@@ -23,78 +23,83 @@ import org.jetbrains.annotations.Nullable;
 @RequiredArgsConstructor
 @ToString
 @Log4j2
-public class LevelWrapper implements ILevel {
-    @NotNull
-    @Getter
-    private final LevelAccessor raw;
-
-    @Override
-    public boolean isServer() {
-        return !raw.isClientSide();
-    }
-
-    @Override
-    @NotNull
-    public IChunk getChunk(@NotNull IBlockPos blockPos) {
-        var pos = (BlockPos) blockPos.getRaw();
-        return new ChunkAccessWrapper(raw.getChunk(pos));
-    }
-
-    @Override
-    public boolean hasChunk(int x, int z) {
-        return raw.hasChunk(x, z);
-    }
-
-    @Override
-    @NotNull
-    public IBlockState getBlockState(@NotNull IBlockPos blockPos) {
-        var pos = (BlockPos) blockPos.getRaw();
-        return new BlockStateWrapper(raw.getBlockState(pos));
-    }
-
-    @Override
-    @Nullable
-    public IBlockEntity getBlockEntity(@NotNull IBlockPos blockPos) {
-        var entity = raw.getBlockEntity((BlockPos) blockPos.getRaw());
-        return entity == null ? null : new BlockEntityWrapper(entity);
-    }
-
-    @Override
-    @NotNull
-    public IRandomSource getRandom() {
-        return new RandomSourceWrapper(raw.getRandom());
-    }
-
-    @Override
-    public boolean removeBlock(@NotNull IBlockPos blockPos, boolean b) {
-        return raw.removeBlock((BlockPos) blockPos.getRaw(), b);
-    }
-
-    @Override
-    public void fallBlock(@NotNull IBlockPos logBlockPos, boolean drop, double dx, double dy, double dz, double vx, double vy, double vz) {
-        var entity = createFallingEntity(logBlockPos, dx, dy, dz);
-        if (!drop) {
-            entity.disableDrop();
-        }
-        entity.setDeltaMovement(vx, vy, vz);
-        raw.addFreshEntity(entity);
-    }
-
-    @NotNull
-    private FallingBlockEntity createFallingEntity(@NotNull IBlockPos logBlockPos, double dx, double dy, double dz) {
-        var x = (double) logBlockPos.getX() + dx;
-        var y = (double) logBlockPos.getY() + dy;
-        var z = (double) logBlockPos.getZ() + dz;
+public class LevelWrapper implements ILevel{
+	@NotNull
+	@Getter
+	private final LevelAccessor raw;
+	
+	@Override
+	public boolean isServer(){
+		return !raw.isClientSide();
+	}
+	
+	@Override
+	@NotNull
+	public IChunk getChunk(@NotNull IBlockPos blockPos){
+		var pos = (BlockPos) blockPos.getRaw();
+		return new ChunkAccessWrapper(raw.getChunk(pos));
+	}
+	
+	@Override
+	public boolean hasChunk(int x, int z){
+		return raw.hasChunk(x, z);
+	}
+	
+	@Override
+	@NotNull
+	public IBlockState getBlockState(@NotNull IBlockPos blockPos){
+		var pos = (BlockPos) blockPos.getRaw();
+		return new BlockStateWrapper(raw.getBlockState(pos));
+	}
+	
+	@Override
+	@Nullable
+	public IBlockEntity getBlockEntity(@NotNull IBlockPos blockPos){
+		var entity = raw.getBlockEntity((BlockPos) blockPos.getRaw());
+		return entity == null ? null : new BlockEntityWrapper(entity);
+	}
+	
+	@Override
+	@NotNull
+	public IRandomSource getRandom(){
+		return new RandomSourceWrapper(raw.getRandom());
+	}
+	
+	@Override
+	public boolean removeBlock(@NotNull IBlockPos blockPos, boolean b){
+		return raw.removeBlock((BlockPos) blockPos.getRaw(), b);
+	}
+	
+	@Override
+	public void setBlock(@NotNull IBlockPos blockPos, @NotNull IBlockState blockState){
+		raw.setBlock((BlockPos) blockPos.getRaw(), (BlockState) blockState.getRaw(), 1);
+	}
+	
+	@Override
+	public void fallBlock(@NotNull IBlockPos logBlockPos, boolean drop, double dx, double dy, double dz, double vx, double vy, double vz){
+		var entity = createFallingEntity(logBlockPos, dx, dy, dz);
+		if(!drop){
+			entity.disableDrop();
+		}
+		entity.setDeltaMovement(vx, vy, vz);
+		raw.addFreshEntity(entity);
+	}
+	
+	@NotNull
+	private FallingBlockEntity createFallingEntity(@NotNull IBlockPos logBlockPos, double dx, double dy, double dz){
+		var x = (double) logBlockPos.getX() + dx;
+		var y = (double) logBlockPos.getY() + dy;
+		var z = (double) logBlockPos.getZ() + dz;
 		var blockState = (BlockState) getBlockState(logBlockPos).getRaw();
-	    var newBlockState = blockState.hasProperty(BlockStateProperties.WATERLOGGED) ? blockState.setValue(BlockStateProperties.WATERLOGGED, false) : blockState;
-	    
-	    var entity = new FallingBlockEntity(EntityType.FALLING_BLOCK, (Level) raw);
-        entity.blocksBuilding = true;
-        entity.setPos(x, y, z);
-        entity.xo = x;
-        entity.yo = y;
-        entity.zo = z;
-        entity.blockState = newBlockState;
-        return entity;
-    }
+		var newBlockState = blockState.hasProperty(BlockStateProperties.WATERLOGGED) ? blockState.setValue(BlockStateProperties.WATERLOGGED, false) : blockState;
+		
+		var entity = new FallingBlockEntity(EntityType.FALLING_BLOCK, (Level) raw);
+		entity.blocksBuilding = true;
+		entity.setPos(x, y, z);
+		entity.xo = x;
+		entity.yo = y;
+		entity.zo = z;
+		entity.blockState = newBlockState;
+		return entity;
+	}
 }
