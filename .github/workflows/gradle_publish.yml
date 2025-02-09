@@ -13,10 +13,5 @@ jobs:
     with:
       java-version: ${{ vars.JAVA_VERSION }}
     secrets:
-      keystore: ${{ secrets.KEYSTORE_FORGE_MODS }}
-      keystore-passphrase: ${{ secrets.KEYSTORE_FORGE_MODS_PASSPHRASE }}
-      key-alias: ${{ secrets.KEYSTORE_FORGE_MODS_ALIAS }}
-      key-store-pass: ${{ secrets.KEYSTORE_FORGE_MODS_STORE_PASS }}
-      key-pass: ${{ secrets.KEYSTORE_FORGE_MODS_KEY_PASS }}
       curseforge-token: ${{ secrets.CURSEFORGE_API_KEY }}
       modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
