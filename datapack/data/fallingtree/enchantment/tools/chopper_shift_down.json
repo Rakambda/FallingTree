@@ -27,6 +27,6 @@
     "mainhand"
   ],
   "exclusive_set": "#fallingtree:exclusive_set/chopper",
-  "supported_items": "#minecraft:enchantable/mining_loot",
+  "supported_items": "#minecraft:axes",
   "weight": 1
 }
