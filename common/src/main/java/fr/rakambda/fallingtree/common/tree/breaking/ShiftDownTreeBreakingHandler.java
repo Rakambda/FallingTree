@@ -66,34 +66,34 @@ public class ShiftDownTreeBreakingHandler implements ITreeBreakingHandler{
 		
 		var breakCount = leaves.stream()
 				.limit(toolHandler.getMaxBreakCount())
-				.mapToInt(part -> breakPart(tree, part, level, player, tool))
+				.mapToInt(part -> breakPart(tree, part, level, player, tool, true))
 				.sum()
 				+
-				breakPart(tree, logPart, level, player, tool);
+				breakPart(tree, logPart, level, player, tool, false);
 		
-		var damage = toolHandler.getActualDamage(breakCount - 1);
+		var damage = toolHandler.getActualDamage(breakCount - (isCancellable ? 0 : 1));
 		if(damage > 0){
 			tool.damage(damage, player);
 		}
 		
-		if(breakCount >= 1){
-			if(level instanceof IServerLevel serverLevel){
-				serverLevel.spawnParticle(tree.getHitPos(), level.getBlockState(tree.getHitPos()), 10, 1, 1, 1, 5);
+		if(breakCount == 0){ // Last block of the tree
+			if(player.isCreative() && mod.getConfiguration().isLootInCreative()){
+				tree.getStart().ifPresent(part -> part.blockState().getBlock().playerDestroy(level, player, tree.getHitPos(), part.blockState(), part.blockEntity(), tool));
 			}
-			if(isCancellable){
-				return SuccessResult.CANCEL;
-			}
-			tree.getStart().ifPresent(part -> level.setBlock(part.blockPos(), part.blockState()));
 			return SuccessResult.DO_NOT_CANCEL;
 		}
 		
-		if(player.isCreative() && mod.getConfiguration().isLootInCreative()){
-			tree.getStart().ifPresent(part -> part.blockState().getBlock().playerDestroy(level, player, tree.getHitPos(), part.blockState(), part.blockEntity(), tool));
+		if(level instanceof IServerLevel serverLevel){
+			serverLevel.spawnParticle(tree.getHitPos(), level.getBlockState(tree.getHitPos()), 10, 1, 1, 1, 5);
 		}
+		if(isCancellable){
+			return SuccessResult.CANCEL;
+		}
+		tree.getStart().ifPresent(part -> level.setBlock(part.blockPos(), part.blockState()));
 		return SuccessResult.DO_NOT_CANCEL;
 	}
 	
-	private int breakPart(@NotNull Tree tree, @NotNull TreePart treePart, @NotNull ILevel level, @NotNull IPlayer player, @NotNull IItemStack tool){
+	private int breakPart(@NotNull Tree tree, @NotNull TreePart treePart, @NotNull ILevel level, @NotNull IPlayer player, @NotNull IItemStack tool, boolean spawnLoot){
 		var blockPos = treePart.blockPos();
 		var logState = level.getBlockState(blockPos);
 		
@@ -105,7 +105,7 @@ public class ShiftDownTreeBreakingHandler implements ITreeBreakingHandler{
 		}
 		
 		player.awardItemUsed(tool.getItem());
-		if(!player.isCreative() || mod.getConfiguration().isLootInCreative()){
+		if((!player.isCreative() && spawnLoot) || (player.isCreative() && mod.getConfiguration().isLootInCreative())){
 			logState.getBlock().playerDestroy(level, player, tree.getHitPos(), logState, level.getBlockEntity(blockPos), tool);
 		}
 		level.removeBlock(blockPos, false);
