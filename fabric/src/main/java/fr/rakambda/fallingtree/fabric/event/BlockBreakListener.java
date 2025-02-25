@@ -29,8 +29,12 @@ public class BlockBreakListener implements PlayerBlockBreakEvents.Before, Player
 	@Override
 	public boolean beforeBlockBreak(Level level, Player player, BlockPos blockPos, BlockState blockState, BlockEntity blockEntity){
 		var wrappedPlayer = new PlayerWrapper(player);
+		var wrappedLevel = level instanceof ServerLevel serverLevel ? new ServerLevelWrapper(serverLevel) : new LevelWrapper(level);
+		var wrappedPos = new BlockPosWrapper(blockPos);
+		var wrappedState = new BlockStateWrapper(blockState);
+		var wrappedEntity = Optional.ofNullable(blockEntity).map(BlockEntityWrapper::new).orElse(null);
 		
-		return !mod.getTreeHandler().shouldCancelEvent(wrappedPlayer);
+		return !mod.getTreeHandler().shouldCancelEvent(wrappedLevel, wrappedPlayer, wrappedPos, wrappedState, wrappedEntity);
 	}
 	
 	@Override
