@@ -23,11 +23,12 @@ updates:
     groups:
       log4j:
         patterns:
-          - org.apache.logging.log4j:log4j-core
-          - org.apache.logging.log4j:log4j-slf4j2-impl
+          - org.apache.logging.log4j:*
       google-apis:
         patterns:
           - com.google.api-client:google-api-client
+          - com.google.apis:*
           - com.google.oauth-client:google-oauth-client-jetty
-          - com.google.apis:google-api-services-gmail
-          - com.google.apis:google-api-services-calendar
+      exposed:
+        patterns:
+          - org.jetbrains.exposed:*
