@@ -57,7 +57,7 @@ public class BlockBreakListener{
 		var wrappedState = new BlockStateWrapper(event.getState());
 		var wrappedEntity = wrappedLevel.getBlockEntity(wrappedPos);
 		
-		if(mod.getTreeHandler().shouldCancelEvent(wrappedPlayer)){
+		if(mod.getTreeHandler().shouldCancelEvent(wrappedLevel, wrappedPlayer, wrappedPos, wrappedState, wrappedEntity)){
 			event.setCanceled(true);
 			return;
 		}
