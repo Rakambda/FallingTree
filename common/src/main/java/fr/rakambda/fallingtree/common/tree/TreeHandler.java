@@ -32,8 +32,19 @@ public class TreeHandler{
 	private final FallingTreeCommon<?> mod;
 	private final Map<UUID, CacheSpeed> speedCache = new ConcurrentHashMap<>();
 	
-	public boolean shouldCancelEvent(@NotNull IPlayer player){
-		return shouldPreserveTool(player);
+	public boolean shouldCancelEvent(@NotNull ILevel level, @NotNull IPlayer player, @NotNull IBlockPos originPos, @NotNull IBlockState originState, @Nullable IBlockEntity originEntity){
+		if(!mod.isPlayerInRightState(player)){
+			return false;
+		}
+		if(!shouldPreserveTool(player)){
+			return false;
+		}
+		try{
+			return mod.getTreeBuilder().getTree(player, level, originPos, originState, originEntity).isPresent();
+		}
+		catch(TreeTooBigException e){
+			return false;
+		}
 	}
 	
 	private boolean shouldPreserveTool(@NotNull IPlayer player){
