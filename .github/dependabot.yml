@@ -10,6 +10,10 @@ updates:
       timezone: Europe/Paris
     pull-request-branch-name:
       separator: '-'
+    groups:
+      docker:
+        patterns:
+          - docker/*
   - package-ecosystem: gradle
     directory: /
     assignees:
